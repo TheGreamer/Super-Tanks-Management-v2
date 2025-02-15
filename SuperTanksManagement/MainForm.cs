@@ -139,44 +139,18 @@ namespace SuperTanksManagement
             }
         }
 
-        private void SaveTankChangesToFile()
+        private void SaveChangesToFile(string filePath, List<string> commentLines, List<string> details)
         {
-            List<string> updatedTankLines = new List<string>();
-            updatedTankLines.AddRange(tankCommentLines);
+            List<string> updatedLines = new List<string>();
+            updatedLines.AddRange(commentLines);
 
-            foreach (string details in tankDetails)
+            foreach (string detail in details)
             {
-                updatedTankLines.Add(details);
-                updatedTankLines.Add(string.Empty);
+                updatedLines.Add(detail);
             }
 
-            while (updatedTankLines.Count > 0 && string.IsNullOrWhiteSpace(updatedTankLines[updatedTankLines.Count - 1]))
-            {
-                updatedTankLines.RemoveAt(updatedTankLines.Count - 1);
-            }
-
-            string updatedFileContent = RemoveExtraBlankLines(string.Join(Environment.NewLine, updatedTankLines));
+            string updatedFileContent = EditFile(string.Join(Environment.NewLine, updatedLines));
             File.WriteAllText(filePath, updatedFileContent);
-        }
-
-        private void SavePowerChangesToFile()
-        {
-            List<string> updatedPowerLines = new List<string>();
-            updatedPowerLines.AddRange(powerCommentLines);
-
-            foreach (string details in powerDetails)
-            {
-                updatedPowerLines.Add(details);
-                updatedPowerLines.Add(string.Empty);
-            }
-
-            while (updatedPowerLines.Count > 0 && string.IsNullOrWhiteSpace(updatedPowerLines[updatedPowerLines.Count - 1]))
-            {
-                updatedPowerLines.RemoveAt(updatedPowerLines.Count - 1);
-            }
-
-            string updatedPowerFileContent = RemoveExtraBlankLines(string.Join(Environment.NewLine, updatedPowerLines));
-            File.WriteAllText(filePath.Replace("tank_setting", "tank_power_setting"), updatedPowerFileContent);
         }
 
         private void RefreshLists()
@@ -192,17 +166,19 @@ namespace SuperTanksManagement
             listBoxPowers.SelectedIndex = -1;
         }
 
-        private string RemoveExtraBlankLines(string input)
+        private string EditFile(string input)
         {
             string[] lines = input.Split(new[] { '\n' }, StringSplitOptions.None);
             string result = string.Empty;
             bool previousLineEmpty = false;
+            bool isTankBlockEnded = false;
+            bool hasInsertedSpaceBeforeTheFirstOption = false;
 
             foreach (string line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (!previousLineEmpty)
+                    if (!previousLineEmpty && !isTankBlockEnded)
                     {
                         result += "\n";
                         previousLineEmpty = true;
@@ -210,40 +186,38 @@ namespace SuperTanksManagement
                 }
                 else
                 {
-                    result += (line.Contains('{') || line.Contains('}') || line.Contains('#') ? "" : "    ") + line + "\n";
+                    if ((line.StartsWith("Acid_Tank = {") || line.StartsWith("Acid = {")) && !hasInsertedSpaceBeforeTheFirstOption)
+                    {
+                        if (!previousLineEmpty)
+                        {
+                            result += "\n";
+                        }
+                        result += line + "\n";
+                        hasInsertedSpaceBeforeTheFirstOption = true;
+                        isTankBlockEnded = false;
+                    }
+                    else if (line.Contains('}'))
+                    {
+                        result += line + "\n";
+                        isTankBlockEnded = true;
+                    }
+                    else
+                    {
+                        result += (line.Contains('{') || line.Contains('}') || line.Contains('#') ? "" : "    ") + line + "\n";
+                        isTankBlockEnded = false;
+                    }
                     previousLineEmpty = false;
                 }
             }
-
-            return result.TrimEnd();
+            
+            result = result.TrimEnd();
+            return result;
         }
 
-        private Dictionary<string, string> ParseTankProperties(string tankDetails)
+        private Dictionary<string, string> ParseProperties(string details)
         {
             var properties = new Dictionary<string, string>();
-            var lines = tankDetails.Split('\n');
-
-            foreach (var line in lines.Skip(1))
-            {
-                if (line.Trim() == "}") break;
-
-                var parts = line.Split('=');
-
-                if (parts.Length == 2)
-                {
-                    string key = parts[0].Trim();
-                    string value = parts[1].Trim();
-                    properties[key] = value;
-                }
-            }
-
-            return properties;
-        }
-
-        private Dictionary<string, string> ParsePowerProperties(string powerDetails)
-        {
-            var properties = new Dictionary<string, string>();
-            var lines = powerDetails.Split('\n');
+            var lines = details.Split('\n');
 
             foreach (var line in lines.Skip(1))
             {
@@ -397,14 +371,14 @@ namespace SuperTanksManagement
 
                 if (selectedIndex >= 0)
                 {
-                    Dictionary<string, string> selectedTankProperties = ParseTankProperties(tankDetails[selectedIndex]);
+                    Dictionary<string, string> selectedTankProperties = ParseProperties(tankDetails[selectedIndex]);
                     BaseSettingsForm baseSettingsForm = new BaseSettingsForm(selectedTank, selectedTankProperties);
 
                     if (baseSettingsForm.ShowDialog() == DialogResult.OK)
                     {
                         string updatedDetails = ConvertPropertiesToText(baseSettingsForm.UpdatedProperties, selectedTank);
                         tankDetails[selectedIndex] = updatedDetails;
-                        SaveTankChangesToFile();
+                        SaveChangesToFile(filePath, tankCommentLines, tankDetails);
                         RefreshLists();
                         LoadTanksFromFile();
                         LoadPowersFromFile();
@@ -442,14 +416,14 @@ namespace SuperTanksManagement
 
                 if (selectedIndex >= 0)
                 {
-                    Dictionary<string, string> selectedPowerProperties = ParsePowerProperties(powerDetails[selectedIndex]);
+                    Dictionary<string, string> selectedPowerProperties = ParseProperties(powerDetails[selectedIndex]);
                     PowerSettingsForm powerSettingsForm = new PowerSettingsForm(selectedPower, selectedPowerProperties);
 
                     if (powerSettingsForm.ShowDialog() == DialogResult.OK)
                     {
                         string updatedDetails = ConvertPropertiesToText(powerSettingsForm.UpdatedProperties, selectedPower);
                         powerDetails[selectedIndex] = updatedDetails;
-                        SavePowerChangesToFile();
+                        SaveChangesToFile(filePath.Replace("tank_setting", "tank_power_setting"), powerCommentLines, powerDetails);
                         RefreshLists();
                         LoadTanksFromFile();
                         LoadPowersFromFile();

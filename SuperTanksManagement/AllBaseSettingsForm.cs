@@ -26,6 +26,39 @@ namespace SuperTanksManagement
             }
         }
 
+        private void RemoveLastEmptyLine(string filePath)
+        {
+            string input = File.ReadAllText(filePath);
+            string[] lines = input.Split(new[] { '\n' }, StringSplitOptions.None);
+            int lastBracketIndex = -1;
+
+            for (int i = lines.Length - 1; i >= 0; i--)
+            {
+                if (lines[i].Trim() == "}")
+                {
+                    lastBracketIndex = i;
+                    break;
+                }
+            }
+
+            if (lastBracketIndex != -1 && lastBracketIndex < lines.Length - 1)
+            {
+                int endIndex = lines.Length;
+
+                for (int i = lastBracketIndex + 1; i < lines.Length; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(lines[i]))
+                    {
+                        endIndex = i;
+                        break;
+                    }
+                }
+
+                string result = string.Join("\n", lines, 0, endIndex).TrimEnd();
+                File.WriteAllText(filePath, result);
+            }
+        }
+
         private void ButtonSave_Click(object sender, EventArgs e)
         {
             Dictionary<string, string> properties = new Dictionary<string, string>();
@@ -58,6 +91,8 @@ namespace SuperTanksManagement
             }
 
             File.WriteAllLines(filePath, lines);
+            RemoveLastEmptyLine(filePath);
+
             MessageBox.Show("New base settings for all super tanks have been saved.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
         }
