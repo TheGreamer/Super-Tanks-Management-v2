@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -59,7 +58,7 @@ namespace SuperTanksManagement
             }
 
             string content = string.Join("\r\n", lines);
-            File.WriteAllText(filePath, content, Encoding.Default);
+            File.WriteAllText(filePath, content);
 
             MessageBox.Show("New base settings for all super tanks have been saved.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

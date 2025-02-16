@@ -146,7 +146,7 @@ namespace SuperTanksManagement
             updatedLines.AddRange(commentLines);
             updatedLines.AddRange(details);
             string updatedFileContent = EditFile(string.Join("\r\n", updatedLines));
-            File.WriteAllText(filePath, updatedFileContent, Encoding.Default);
+            File.WriteAllText(filePath, updatedFileContent);
         }
 
         private void RefreshLists()
