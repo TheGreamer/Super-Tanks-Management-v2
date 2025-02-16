@@ -60,7 +60,7 @@ namespace SuperTanksManagement
 
         private void LoadTanksFromFile()
         {
-            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
+            string[] lines = File.ReadAllLines(filePath);
             string currentTank = "";
             string tankDetail = "";
             bool insideBlock = false;
@@ -105,7 +105,7 @@ namespace SuperTanksManagement
 
         private void LoadPowersFromFile()
         {
-            string[] lines = File.ReadAllLines(filePath.Replace("tank_setting", "tank_power_setting"), Encoding.Default);
+            string[] lines = File.ReadAllLines(filePath.Replace("tank_setting", "tank_power_setting"));
             string currentPower = "";
             string powerDetail = "";
             bool insideBlock = false;

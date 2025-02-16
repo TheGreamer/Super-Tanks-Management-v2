@@ -48,7 +48,7 @@ namespace SuperTanksManagement
             }
 
             string filePath = Settings.Default.FilePath;
-            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
+            string[] lines = File.ReadAllLines(filePath);
 
             for (int i = 0; i < lines.Length; i++)
             {

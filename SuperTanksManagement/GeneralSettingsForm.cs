@@ -52,7 +52,7 @@ namespace SuperTanksManagement
         private string LoadSettings(string fileName, Dictionary<string, TextBox> textBoxMapping)
         {
             string filePath = Settings.Default.FilePath.Replace("tank_setting.txt", fileName);
-            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
+            string[] lines = File.ReadAllLines(filePath);
 
             foreach (string line in lines)
             {
