@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace SuperTanksManagement
@@ -51,7 +52,7 @@ namespace SuperTanksManagement
         private string LoadSettings(string fileName, Dictionary<string, TextBox> textBoxMapping)
         {
             string filePath = Settings.Default.FilePath.Replace("tank_setting.txt", fileName);
-            string[] lines = File.ReadAllLines(filePath);
+            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
 
             foreach (string line in lines)
             {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -23,39 +24,6 @@ namespace SuperTanksManagement
                     label.MouseEnter += new EventHandler(Labels_MouseEnter);
                     label.MouseLeave += new EventHandler(Labels_MouseLeave);
                 }
-            }
-        }
-
-        private void RemoveLastEmptyLine(string filePath)
-        {
-            string input = File.ReadAllText(filePath);
-            string[] lines = input.Split(new[] { '\n' }, StringSplitOptions.None);
-            int lastBracketIndex = -1;
-
-            for (int i = lines.Length - 1; i >= 0; i--)
-            {
-                if (lines[i].Trim() == "}")
-                {
-                    lastBracketIndex = i;
-                    break;
-                }
-            }
-
-            if (lastBracketIndex != -1 && lastBracketIndex < lines.Length - 1)
-            {
-                int endIndex = lines.Length;
-
-                for (int i = lastBracketIndex + 1; i < lines.Length; i++)
-                {
-                    if (!string.IsNullOrWhiteSpace(lines[i]))
-                    {
-                        endIndex = i;
-                        break;
-                    }
-                }
-
-                string result = string.Join("\n", lines, 0, endIndex).TrimEnd();
-                File.WriteAllText(filePath, result);
             }
         }
 
@@ -80,7 +48,7 @@ namespace SuperTanksManagement
             }
 
             string filePath = Settings.Default.FilePath;
-            string[] lines = File.ReadAllLines(filePath);
+            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -90,8 +58,8 @@ namespace SuperTanksManagement
                 }
             }
 
-            File.WriteAllLines(filePath, lines);
-            RemoveLastEmptyLine(filePath);
+            string content = string.Join("\r\n", lines);
+            File.WriteAllText(filePath, content, Encoding.Default);
 
             MessageBox.Show("New base settings for all super tanks have been saved.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

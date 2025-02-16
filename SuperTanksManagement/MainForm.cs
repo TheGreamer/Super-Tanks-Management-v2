@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace SuperTanksManagement
@@ -59,7 +60,7 @@ namespace SuperTanksManagement
 
         private void LoadTanksFromFile()
         {
-            string[] lines = File.ReadAllLines(filePath);
+            string[] lines = File.ReadAllLines(filePath, Encoding.Default);
             string currentTank = "";
             string tankDetail = "";
             bool insideBlock = false;
@@ -104,7 +105,7 @@ namespace SuperTanksManagement
 
         private void LoadPowersFromFile()
         {
-            string[] lines = File.ReadAllLines(filePath.Replace("tank_setting", "tank_power_setting"));
+            string[] lines = File.ReadAllLines(filePath.Replace("tank_setting", "tank_power_setting"), Encoding.Default);
             string currentPower = "";
             string powerDetail = "";
             bool insideBlock = false;
@@ -143,14 +144,9 @@ namespace SuperTanksManagement
         {
             List<string> updatedLines = new List<string>();
             updatedLines.AddRange(commentLines);
-
-            foreach (string detail in details)
-            {
-                updatedLines.Add(detail);
-            }
-
-            string updatedFileContent = EditFile(string.Join(Environment.NewLine, updatedLines));
-            File.WriteAllText(filePath, updatedFileContent);
+            updatedLines.AddRange(details);
+            string updatedFileContent = EditFile(string.Join("\r\n", updatedLines));
+            File.WriteAllText(filePath, updatedFileContent, Encoding.Default);
         }
 
         private void RefreshLists()
